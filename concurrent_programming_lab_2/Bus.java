@@ -1,42 +1,37 @@
 import java.util.concurrent.Semaphore;
 
 public class Bus implements Runnable {
-    private int id; // ID of the bus
-    private int capacity = 50; // maximum capacity of the bus
+    private int busId;
+
     private Semaphore mutex;
     private Semaphore bus;
     private Semaphore boarded;
 
-    public Bus(int id, Semaphore mutex, Semaphore bus, Semaphore boarded) {
-        this.id = id;
+    public Bus(int busId, Semaphore mutex, Semaphore bus, Semaphore boarded) {
+        this.busId = busId;
         this.mutex = mutex;
         this.bus = bus;
         this.boarded = boarded;
     }
 
-    // print bus has arrived (with ID)
-    public void arrive() {
-        System.out.println("\n" + "Bus " + "(ID: " + id + ")" + " has arrived!" + " --- " + SenateBusProblem.waiting);
-    }
-
-    // print bus has departed (with ID)
     public void depart() {
-        System.out.println("Bus " + "(ID: " + id + ")" + " has departed!" + " --- " + SenateBusProblem.waiting + "\n");
+        System.out.println("Bus " + busId  + " has departed " + " | " + Main.waiting +" riders are waiting");
     }
 
     @Override
     public void run() {
         try {
             mutex.acquire();
-            arrive();
-            int n = Math.min(SenateBusProblem.waiting, capacity);
+            System.out.println("Bus " +  busId +  " has arrived " + " | " + Main.waiting+" riders are waiting");
 
-            for (int i = 0; i < n; i++) {
+            int numberOfRidersToBoard = Math.min(Main.waiting, 50);
+
+            for (int i = 0; i < numberOfRidersToBoard; i++) {
                 bus.release();
                 boarded.acquire();
             }
 
-            SenateBusProblem.waiting=Math.max(SenateBusProblem.waiting - capacity, 0);
+            Main.waiting=Math.max(Main.waiting - 50, 0);
             mutex.release();
 
             depart();
